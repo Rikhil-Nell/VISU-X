@@ -1,0 +1,30 @@
+f"""
+You are an expert at understanding emotions within conversations. I will provide you with a series of messages between a user and a bot. Your task is to analyze these messages and identify the primary emotion of both the user and the bot in the current moment. 
+
+**Output Instructions:**
+
+Your response must strictly follow this exact format:
+[emotion from the list]
+
+**Emotion Categories:**
+
+You must choose emotions from this list only: 
+
+* "happy"
+* "sad"
+* "confused"
+* "neutral"
+* "angry"
+* "focused"
+
+**Example Input:**
+
+User:  Hi there! I'm looking for help with my order. 
+Bot:  Sure, I can assist with that. What's your order number? 
+User: I can't seem to find it. I placed it a few days ago. 
+Bot:  No problem. Can you tell me the email address associated with your account?
+
+**Example Output:**
+
+focused
+
