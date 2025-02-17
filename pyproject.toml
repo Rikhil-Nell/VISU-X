@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "deepgram-sdk>=3.10.0",
+    "flask>=3.1.0",
+    "flask-cors>=5.0.0",
     "openai>=1.63.0",
     "pyaudio>=0.2.14",
     "pydantic-ai>=0.0.24",

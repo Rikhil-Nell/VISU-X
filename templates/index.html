@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>VISU BOT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="buttons">
+        <button onclick="eyes.startBlinking()">Start Blinking</button>
+        <button onclick="eyes.stopBlinking()">Stop Blinking</button>
+        <button onclick="eyes.blink()">Blink</button>
+        <button onclick="eyes.express({type: 'happy'})">Happy</button>
+        <button onclick="eyes.express({type: 'sad'})">Sad</button>
+        <button onclick="eyes.express({type: 'angry'})">Mad</button>
+        <button onclick="eyes.express({type: 'focused'})">Focused</button>
+        <button onclick="eyes.express({type: 'confused'})">Confused</button>
+    </div>
+    <div class="face">
+        <div class="eye left">
+            <div class="eyelid upper"></div>
+            <div class="eyelid lower"></div>
+        </div>
+        <div class="eye right">
+            <div class="eyelid upper"></div>
+            <div class="eyelid lower"></div>
+        </div>
+    </div>
+</body>
+
+<script src="{{ url_for('static', filename='index.js') }}"></script>
+</html>
