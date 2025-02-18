@@ -2,8 +2,8 @@ import streamlit as st
 import asyncio
 from VISU import VISU, Deps
 from DB import DatabaseHandler
-from emotion import bot_emotion
-
+from emotion import bot_emotion 
+from TTS import tts, play_st
 # Initialize dependencies and handlers
 deps = Deps()
 db_handler = DatabaseHandler(deps=deps)
@@ -62,11 +62,18 @@ if selected_section == "Chat with VISU":
         # Generate VISU's response
         result = asyncio.run(VISU.run(user_prompt=user_message, message_history=memory))
         bot_response = result.data if result else "Sorry, I couldn't process that."
-
+        
+        # Generate TTS audio from VISU's response
+        tts(bot_response)
+        
         # Append VISU's response to session state and database
         st.session_state.messages.append({"role": "assistant", "content": bot_response})
         with st.chat_message("assistant"):
             st.markdown(bot_response)
+        
+        # Play the TTS audio
+        st.button("🔊 Play Audio", on_click=play_st())
+            
         asyncio.run(db_handler.append_message(user_id, "bot", bot_response))
 
 # Logs Section

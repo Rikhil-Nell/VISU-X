@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from typing import Any, List
 from dotenv import load_dotenv
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.models.groq import GroqModel
+from pydantic_ai.settings import ModelSettings
+from pydantic_ai.models.groq import GroqModel, GroqModelSettings
 from pydantic_ai.usage import UsageLimits
 from supabase import create_client
 
@@ -12,6 +13,14 @@ load_dotenv()
 
 # Define the LLM model
 llm = "llama-3.3-70b-versatile"
+
+# Define Groq model settings
+groq_settings = GroqModelSettings(
+    temperature=0.7,
+#    max_tokens=100,
+    top_p=0.95,
+    frequency_penalty=0,
+)
 
 # Initialize Groq model
 model = GroqModel(
@@ -30,12 +39,10 @@ class Deps:
 with open("prompt.txt", "r") as file:
     prompt = file.read()
 
-# Define usage limits
-usage_limits = UsageLimits(response_tokens_limit=1500)
-
 # Initialize the Pixy agent
 VISU = Agent(
     model=model,
+    model_settings=groq_settings,
     system_prompt=prompt,
     deps_type=Deps,
     retries=3
