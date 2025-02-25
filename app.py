@@ -2,8 +2,9 @@ import streamlit as st
 import asyncio
 from VISU import VISU, Deps
 from DB import DatabaseHandler
-from emotion import bot_emotion 
-from TTS import tts, play_st
+from emotion import bot_emotion
+from TTS import tts, play
+
 # Initialize dependencies and handlers
 deps = Deps()
 db_handler = DatabaseHandler(deps=deps)
@@ -17,7 +18,9 @@ st.set_page_config(
 
 # Sidebar navigation
 st.sidebar.header("Navigation")
-selected_section = st.sidebar.radio("Select Section", ["Chat with VISU", "Logs", "Robot Movement"])
+selected_section = st.sidebar.radio(
+    "Select Section", ["Chat with VISU", "Logs", "Robot Movement"]
+)
 
 # Chat Section
 if selected_section == "Chat with VISU":
@@ -51,29 +54,31 @@ if selected_section == "Chat with VISU":
 
         # Detect user's emotion and update the frontend
         emotion = asyncio.run(bot_emotion(user_id))
-        st.markdown(f"<h3 style='color:grey;'>Detected Emotion: {emotion}</h3>", unsafe_allow_html=True)
-        
+        st.markdown(
+            f"<h3 style='color:grey;'>Detected Emotion: {emotion}</h3>",
+            unsafe_allow_html=True,
+        )
+
         # Append user's message to the database
         asyncio.run(db_handler.append_message(user_id, "user", user_message))
-    
+
         # Retrieve conversation memory
         memory = asyncio.run(db_handler.get_memory(user_id=user_id, limit=20))
 
         # Generate VISU's response
         result = asyncio.run(VISU.run(user_prompt=user_message, message_history=memory))
         bot_response = result.data if result else "Sorry, I couldn't process that."
-        
+
         # Generate TTS audio from VISU's response
         tts(bot_response)
-        
+
         # Append VISU's response to session state and database
         st.session_state.messages.append({"role": "assistant", "content": bot_response})
         with st.chat_message("assistant"):
             st.markdown(bot_response)
-        
-        # Play the TTS audio
-        st.button("🔊 Play Audio", on_click=play_st())
-            
+
+        play("audio/output_file.mp3")
+
         asyncio.run(db_handler.append_message(user_id, "bot", bot_response))
 
 # Logs Section
@@ -82,7 +87,11 @@ elif selected_section == "Logs":
     st.write("This section displays live logs from Logfire for monitoring.")
 
     # Example of live log refresh (mock logs for now)
-    log_data = ["[INFO] System initialized.", "[INFO] VISU response time: 0.5s", "[ERROR] Network timeout."]
+    log_data = [
+        "[INFO] System initialized.",
+        "[INFO] VISU response time: 0.5s",
+        "[ERROR] Network timeout.",
+    ]
     st.write("**Live Logs**:")
     for log in log_data:
         st.code(log)

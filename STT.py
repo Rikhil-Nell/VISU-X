@@ -1,11 +1,5 @@
 import asyncio
-from dotenv import load_dotenv
-import shutil
-import subprocess
-import requests
-import time
 import os
-
 
 from deepgram import (
     DeepgramClient,
@@ -15,7 +9,10 @@ from deepgram import (
     Microphone,
 )
 
-load_dotenv()
+from settings import Settings
+
+settings = Settings()
+
 
 class TranscriptCollector:
     def __init__(self):
@@ -28,9 +25,11 @@ class TranscriptCollector:
         self.transcript_parts.append(part)
 
     def get_full_transcript(self):
-        return ' '.join(self.transcript_parts)
+        return " ".join(self.transcript_parts)
+
 
 transcript_collector = TranscriptCollector()
+
 
 async def get_transcript(callback):
     transcription_complete = asyncio.Event()  # Event to signal transcription completion
@@ -38,14 +37,14 @@ async def get_transcript(callback):
     try:
         # example of setting up a client config. logging values: WARNING, VERBOSE, DEBUG, SPAM
         config = DeepgramClientOptions(options={"keepalive": "true"})
-        deepgram: DeepgramClient = DeepgramClient(os.getenv("DEEPGRAM_API_KEY"), config)
+        deepgram: DeepgramClient = DeepgramClient(api_key=settings.deepgram_key, config=config)
 
-        dg_connection = deepgram.listen.asynclive.v("1")
-        print ("Listening...")
+        dg_connection = deepgram.websocket.v("1")
+        print("Listening...")
 
         async def on_message(self, result, **kwargs):
             sentence = result.channel.alternatives[0].transcript
-            
+
             if not result.speech_final:
                 transcript_collector.add_part(sentence)
             else:
@@ -79,7 +78,9 @@ async def get_transcript(callback):
         microphone = Microphone(dg_connection.send)
         microphone.start()
 
-        await transcription_complete.wait()  # Wait for the transcription to complete instead of looping indefinitely
+        await (
+            transcription_complete.wait()
+        )  # Wait for the transcription to complete instead of looping indefinitely
 
         # Wait for the microphone to close
         microphone.finish()
@@ -90,4 +91,3 @@ async def get_transcript(callback):
     except Exception as e:
         print(f"Could not open socket: {e}")
         return
-    

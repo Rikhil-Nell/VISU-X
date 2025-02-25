@@ -10,6 +10,7 @@ db_handler = DatabaseHandler(deps=deps)
 WEBSOCKET_URL = "ws://localhost:8765"
 MESSAGE_LIMIT = 5
 
+
 async def set_face_emotion(emotion: str) -> None:
     """
     Sends the detected emotion to the WebSocket server to update the emotion display.
@@ -20,6 +21,7 @@ async def set_face_emotion(emotion: str) -> None:
     async with websockets.connect(WEBSOCKET_URL) as websocket:
         payload = {"emotion": emotion}
         await websocket.send(json.dumps(payload))
+
 
 async def bot_emotion(user_id: str) -> str:
     """
@@ -33,16 +35,16 @@ async def bot_emotion(user_id: str) -> str:
         str: The detected emotion.
     """
     # Read the emotion analysis template from a file
-    with open('face_emotion.txt', 'r') as file:
+    with open("face_emotion.txt", "r") as file:
         prompt_template = file.read()
-    
+
     messages = await db_handler.get_memory(user_id, limit=MESSAGE_LIMIT)
-    
+
     # Format the prompt with the recent message history
     response = await VISU.run(user_prompt=prompt_template, message_history=messages)
 
     # Extract emotion and trigger WebSocket message
     emotion = response.data if response else "neutral"
     await set_face_emotion(emotion)
-    
+
     return emotion
