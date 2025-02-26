@@ -77,7 +77,7 @@ if selected_section == "Chat with VISU":
         with st.chat_message("assistant"):
             st.markdown(bot_response)
 
-        play("audio/output_file.mp3")
+        play()
 
         asyncio.run(db_handler.append_message(user_id, "bot", bot_response))
 

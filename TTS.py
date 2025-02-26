@@ -24,7 +24,8 @@ def tts(input_text: str) -> None:
     deepgram.speak.rest.v("1").save(filename, SPEAK_OPTIONS, options)
 
 
-def play(filename: str) -> None:
+def play() -> None:
+    filename = "audio/output_file.mp3"
     subprocess.Popen(
         ["ffplay", "-nodisp", "-autoexit", filename],
         stdout=subprocess.DEVNULL,

@@ -10,9 +10,6 @@ from supabase import create_client
 
 settings = Settings()
 
-# Define the LLM model
-llm = "llama-3.3-70b-versatile"
-
 # Define Groq model settings
 groq_settings = GroqModelSettings(
     temperature=0.7,
@@ -20,6 +17,9 @@ groq_settings = GroqModelSettings(
     top_p=0.95,
     frequency_penalty=0,
 )
+
+# Define the LLM model
+llm = "llama-3.3-70b-versatile"
 
 # Initialize Groq model
 model = GroqModel(
@@ -49,10 +49,8 @@ VISU = Agent(
     retries=3,
 )
 
-@VISU.tool_plain
-async def wave() -> str:
-    """Wave to the user
-    Returns:
-        str: A message to the user
-    """
-    return "waving a the user!"
+@VISU.tool_plain()
+async def wave() -> None:
+    """Use this if you detet a greeting from the user"""
+    print("Waving... ")
+
