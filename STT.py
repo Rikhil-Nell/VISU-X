@@ -1,93 +1,109 @@
-import asyncio
-import os
-
-from deepgram import (
-    DeepgramClient,
-    DeepgramClientOptions,
-    LiveTranscriptionEvents,
-    LiveOptions,
-    Microphone,
-)
-
+import webrtcvad
+import pyaudio
+import sys
+import time
+import wave
+from uuid import uuid4
+from groq import Groq
 from settings import Settings
 
+# Move constant declarations outside the function
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 16000  # 8000, 16000, 32000
+FRAMES_PER_BUFFER = 320
+
+# Initialize Settings (outside the function)
 settings = Settings()
 
+# Initialize the Groq Client (outside the function)
+client = Groq(api_key=settings.groq_key)
 
-class TranscriptCollector:
-    def __init__(self):
-        self.reset()
+# Initialize the VAD with a mode (e.g. aggressive, moderate, or gentle) (outside the function)
+vad = webrtcvad.Vad(1)
 
-    def reset(self):
-        self.transcript_parts = []
+# Initialize PyAudio (outside the function)
+pa = pyaudio.PyAudio()
 
-    def add_part(self, part):
-        self.transcript_parts.append(part)
+def transcribe_audio() -> str:
+    print("Voice Activity Monitoring")
+    print("1 - Activity Detected")
+    print("_ - No Activity Detected")
+    print("X - No Activity Detected for Last IDLE_TIME Seconds")
+    print("\nMonitor Voice Activity Below:")
 
-    def get_full_transcript(self):
-        return " ".join(self.transcript_parts)
+    # Open a PyAudio stream to get audio data from the microphone
+    stream = pa.open(
+        format=FORMAT,
+        channels=CHANNELS,
+        rate=RATE,
+        input=True,
+        frames_per_buffer=FRAMES_PER_BUFFER,
+    )
 
+    inactive_session = False
+    inactive_since = time.time()
+    frames = []  # list to hold audio frames
+    while True:
+        # Read audio data from the microphone
+        data = stream.read(FRAMES_PER_BUFFER)
 
-transcript_collector = TranscriptCollector()
+        # Check if the audio is active (i.e. contains speech)
+        is_active = vad.is_speech(data, sample_rate=RATE)
 
-
-async def get_transcript(callback):
-    transcription_complete = asyncio.Event()  # Event to signal transcription completion
-
-    try:
-        # example of setting up a client config. logging values: WARNING, VERBOSE, DEBUG, SPAM
-        config = DeepgramClientOptions(options={"keepalive": "true"})
-        deepgram: DeepgramClient = DeepgramClient(api_key=settings.deepgram_key, config=config)
-
-        dg_connection = deepgram.websocket.v("1")
-        print("Listening...")
-
-        async def on_message(self, result, **kwargs):
-            sentence = result.channel.alternatives[0].transcript
-
-            if not result.speech_final:
-                transcript_collector.add_part(sentence)
+        # Check Flagging for Stop after N Seconds
+        idle_time = 1
+        if is_active:
+            inactive_session = False
+        else:
+            if inactive_session == False:
+                inactive_session = True
+                inactive_since = time.time()
             else:
-                # This is the final part of the current sentence
-                transcript_collector.add_part(sentence)
-                full_sentence = transcript_collector.get_full_transcript()
-                # Check if the full_sentence is not empty before printing
-                if len(full_sentence.strip()) > 0:
-                    full_sentence = full_sentence.strip()
-                    print(f"Human: {full_sentence}")
-                    callback(full_sentence)  # Call the callback with the full_sentence
-                    transcript_collector.reset()
-                    transcription_complete.set()  # Signal to stop transcription and exit
+                inactive_session = True
 
-        dg_connection.on(LiveTranscriptionEvents.Transcript, on_message)
+        # Stop hearing if no voice activity detected for N Seconds
+        if (inactive_session == True) and (time.time() - inactive_since) > idle_time:
+            sys.stdout.write("X")
 
-        options = LiveOptions(
-            model="nova-2",
-            punctuate=True,
-            language="en-US",
-            encoding="linear16",
-            channels=1,
-            sample_rate=16000,
-            endpointing=300,
-            smart_format=True,
-        )
+            # Append data chunk of audio to frames - save later
+            frames.append(data)
 
-        await dg_connection.start(options)
+            # Save the recorded data as a WAV file
+            filename = (
+                f"audio/RECORDED-{str(time.time())}-{str(uuid4()).replace('-', '')}.wav"
+            )
+            wf = wave.open(filename, "wb")
+            wf.setnchannels(CHANNELS)
+            wf.setsampwidth(pa.get_sample_size(FORMAT))
+            wf.setframerate(RATE)
+            wf.writeframes(b"".join(frames))
+            wf.close()
 
-        # Open a microphone stream on the default input device
-        microphone = Microphone(dg_connection.send)
-        microphone.start()
+            with open(filename, "rb") as file:
+                # Create a transcription of the audio file
+                transcription = client.audio.transcriptions.create(
+                    file=(filename, file.read()),  # Required audio file
+                    model="whisper-large-v3-turbo",  # Required model to use for transcription
+                )
+            # print(f"Transcription: {transcription.text}")
 
-        await (
-            transcription_complete.wait()
-        )  # Wait for the transcription to complete instead of looping indefinitely
+            # Close the PyAudio stream
+            stream.stop_stream()
+            stream.close()
 
-        # Wait for the microphone to close
-        microphone.finish()
+            # Return the transcription text
+            return transcription.text
 
-        # Indicate that we've finished
-        await dg_connection.finish()
+        else:
+            sys.stdout.write("1" if is_active else "_")
 
-    except Exception as e:
-        print(f"Could not open socket: {e}")
-        return
+        # Append data chunk of audio to frames - save later
+        frames.append(data)
+
+        # Flush Terminal
+        sys.stdout.flush()
+
+# Example usage:
+# transcription = transcribe_audio()
+# print(transcription)

@@ -5,17 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "deepgram-sdk>=3.10.0",
+    "deepgram-sdk>=3.10.1",
     "flask>=3.1.0",
     "flask-cors>=5.0.0",
-    "openai>=1.63.0",
     "pyaudio>=0.2.14",
     "pydantic-ai>=0.0.24",
     "pydantic-settings>=2.8.0",
-    "pydub>=0.25.1",
     "python-dotenv>=1.0.1",
     "ruff>=0.9.7",
-    "speechrecognition>=3.14.1",
+    "setuptools>=76.0.0",
     "streamlit>=1.42.0",
     "supabase>=2.13.0",
+    "webrtcvad>=2.0.10",
 ]

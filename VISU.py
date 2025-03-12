@@ -1,11 +1,8 @@
-import os
 from dataclasses import dataclass
-from typing import Any, List
+from typing import Any
 from settings import Settings
-from pydantic_ai import Agent, RunContext
-from pydantic_ai.settings import ModelSettings
+from pydantic_ai import Agent
 from pydantic_ai.models.groq import GroqModel, GroqModelSettings
-from pydantic_ai.usage import UsageLimits
 from supabase import create_client
 
 settings = Settings()
@@ -49,8 +46,8 @@ VISU = Agent(
     retries=3,
 )
 
+
 @VISU.tool_plain()
 async def wave() -> None:
     """Use this if you detet a greeting from the user"""
     print("Waving... ")
-

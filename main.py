@@ -2,7 +2,7 @@ import asyncio
 from VISU import VISU, Deps
 from DB import DatabaseHandler
 from emotion import bot_emotion
-from STT import get_transcript
+from STT import transcribe_audio
 from TTS import tts, play
 
 # Initialize dependencies and handlers
@@ -11,18 +11,14 @@ database_handler = DatabaseHandler(deps=deps)
 
 
 async def main():
-    transcription_response = ""
-
-    def handle_full_sentence(full_sentence):
-        nonlocal transcription_response
-        transcription_response = full_sentence
 
     # Loop indefinitely until "goodbye" is detected
     while True:
-        await get_transcript(handle_full_sentence)
 
-        # Check for "goodbye" to exit the loop
-        if "goodbye" in transcription_response.lower():
+        # Start the transcription process
+        transcription_response = transcribe_audio()
+        
+        if transcription_response == "goodbye":
             break
 
         # Process the transcription response
@@ -33,11 +29,11 @@ async def main():
         emotion = await bot_emotion(user_id)
         print(f"Detected Emotion: {emotion}")
 
-        # Append user's message to the database
-        await database_handler.append_message(user_id, "user", user_message)
-
         # Retrieve conversation memory
         memory = await database_handler.get_memory(user_id=user_id, limit=20)
+
+        # Append user's message to the database
+        await database_handler.append_message(user_id, "user", user_message)
 
         # Generate VISU's response
         result = await VISU.run(user_prompt=user_message, message_history=memory)
@@ -50,7 +46,7 @@ async def main():
         tts(bot_response)
 
         # Play the TTS audio
-        play("audio/output_file.mp3")
+        play()
 
         # Reset transcription_response for the next loop iteration
         transcription_response = ""
