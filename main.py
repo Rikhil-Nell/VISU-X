@@ -9,21 +9,20 @@ from TTS import tts, play
 deps = Deps()
 database_handler = DatabaseHandler(deps=deps)
 
+user_id = "example_user_id"  # Replace with actual user ID
 
-async def main():
+async def voice():
+    
+    listening = True  # Enable STT by default
 
     # Loop indefinitely until "goodbye" is detected
     while True:
-
-        # Start the transcription process
-        transcription_response = transcribe_audio()
         
-        if transcription_response == "goodbye":
-            break
+        listening = True  # Enable STT
+        # Start the transcription process
+        transcription_response = transcribe_audio(listening)
 
-        # Process the transcription response
-        user_id = "example_user_id"  # Replace with actual user ID
-        user_message = str(transcription_response)
+        user_message = transcription_response
 
         # Detect user's emotion and update the frontend
         emotion = await bot_emotion(user_id)
@@ -45,12 +44,44 @@ async def main():
         # Generate TTS audio from VISU's response
         tts(bot_response)
 
-        # Play the TTS audio
-        play()
+        listening = False  # Disable STT while TTS is playing
+        play()  # Blocking call ensures STT resumes only after TTS finishes
+        listening = True  # Re-enable STT after playback
 
-        # Reset transcription_response for the next loop iteration
-        transcription_response = ""
+        if "goodbye" in transcription_response.lower():
+            break  # Exit the loop if "goodbye" is detected
 
+        transcription_response = "" # Reset the transcription response
+
+async def chat():
+    while True:
+        user_message = input("You: ")
+
+        if user_message == "exit":
+            break
+
+        emotion = await bot_emotion(user_id=user_id)
+        print("Detected Emotion:", emotion)
+
+        await database_handler.append_message(user_id=user_id, role="user", content=user_message)
+        
+        memory = await database_handler.get_memory(user_id=user_id, limit=20)
+
+        result = await VISU.run(user_prompt=user_message, message_history=memory)
+        response = result.data if result else "Sorry, I failed to process that."
+
+        print("Bot:", response)
+        
+        await database_handler.append_message(user_id=user_id, role="bot", content=response)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    print("Choose an option:")
+    print("1. Text chat")
+    print("2. Voice chat")
+    choice = input("Enter your choice (1/2): ")
+
+    if choice == "1":
+        asyncio.run(chat())
+    elif choice == "2":
+        asyncio.run(voice())
+    

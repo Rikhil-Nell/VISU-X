@@ -25,7 +25,9 @@ vad = webrtcvad.Vad(1)
 # Initialize PyAudio (outside the function)
 pa = pyaudio.PyAudio()
 
-def transcribe_audio() -> str:
+def transcribe_audio(listening : bool) -> str:
+
+
     print("Voice Activity Monitoring")
     print("1 - Activity Detected")
     print("_ - No Activity Detected")
@@ -44,7 +46,13 @@ def transcribe_audio() -> str:
     inactive_session = False
     inactive_since = time.time()
     frames = []  # list to hold audio frames
+
     while True:
+
+        if not listening:
+            time.sleep(0.1)  # Wait while TTS is playing
+            continue
+
         # Read audio data from the microphone
         data = stream.read(FRAMES_PER_BUFFER)
 
@@ -103,7 +111,3 @@ def transcribe_audio() -> str:
 
         # Flush Terminal
         sys.stdout.flush()
-
-# Example usage:
-# transcription = transcribe_audio()
-# print(transcription)

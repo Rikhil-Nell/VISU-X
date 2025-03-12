@@ -2,7 +2,6 @@ from deepgram import (
     DeepgramClient,
     SpeakOptions,
 )
-import os
 import streamlit as st
 import subprocess
 from settings import Settings
@@ -26,7 +25,7 @@ def tts(input_text: str) -> None:
 
 def play() -> None:
     filename = "audio/output_file.mp3"
-    subprocess.Popen(
+    subprocess.run(
         ["ffplay", "-nodisp", "-autoexit", filename],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,

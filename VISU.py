@@ -46,8 +46,7 @@ VISU = Agent(
     retries=3,
 )
 
-
 @VISU.tool_plain()
 async def wave() -> None:
-    """Use this if you detet a greeting from the user"""
+    """Wave at the the user when being greeted or saying goodbye."""
     print("Waving... ")
