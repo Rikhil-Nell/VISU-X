@@ -25,7 +25,7 @@ async def voice():
 
         # Detect user's emotion and update the frontend
         emotion = await bot_emotion(user_id)
-        print(f"Detected Emotion: {emotion}")
+        print(f"\n Detected Emotion: {emotion}")
 
         # Retrieve conversation memory
         memory = await database_handler.get_memory(user_id=user_id, limit=20)

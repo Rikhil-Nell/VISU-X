@@ -60,7 +60,7 @@ class EyeController {
     });
   }
 
-  async express({ type = "", duration = 1000, enterDuration = 75, exitDuration = 75 }) {
+  async express({ type = "", duration = 5000, enterDuration = 75, exitDuration = 75 }) {
     console.log(`Expressing: ${type}`);
 
     // Send API request
@@ -157,23 +157,24 @@ document.querySelector("button:nth-child(6)").addEventListener("click", () => ey
 document.querySelector("button:nth-child(7)").addEventListener("click", () => eyes.express({ type: "focused" }));
 document.querySelector("button:nth-child(8)").addEventListener("click", () => eyes.express({ type: "confused" }));
 
-const socket = new WebSocket("ws://localhost:8765");
 
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    if (data.emotion) {
-        eyes.express({ type: data.emotion });
+let currentEmotion = null;  // Track the last emotion
+
+async function fetchEmotion() {
+    try {
+        const response = await fetch("http://localhost:5000/api/get_emotion");
+        const data = await response.json();
+
+        if (data.type !== currentEmotion) {  // Only update if the emotion changed
+            console.log("Updating Emotion:", data.type);
+            currentEmotion = data.type;
+            eyes.express({ type: data.type });  
+        }
+    } catch (error) {
+        console.error("Failed to fetch emotion:", error);
     }
-};
+}
 
-socket.onopen = function() {
-    console.log("WebSocket connected.");
-};
+// Poll every 2 seconds
+setInterval(fetchEmotion, 2000);
 
-socket.onclose = function() {
-    console.log("WebSocket closed.");
-};
-
-socket.onerror = function(error) {
-    console.error("WebSocket Error:", error);
-};

@@ -1,5 +1,6 @@
 import websockets
 import json
+import aiohttp
 from VISU import Deps, emotion_agent
 from DB import DatabaseHandler
 
@@ -11,16 +12,9 @@ WEBSOCKET_URL = "ws://localhost:8765"
 MESSAGE_LIMIT = 5
 
 
-async def set_face_emotion(emotion: str) -> None:
-    """
-    Sends the detected emotion to the WebSocket server to update the emotion display.
-
-    Args:
-        emotion (str): The detected emotion to be sent to the WebSocket server.
-    """
-    async with websockets.connect(WEBSOCKET_URL) as websocket:
-        payload = {"emotion": emotion}
-        await websocket.send(json.dumps(payload))
+async def set_face_emotion(emotion):
+    async with aiohttp.ClientSession() as session:
+        await session.post("http://localhost:5000/api/express", json={"type": emotion})
 
 
 async def bot_emotion(user_id: str) -> str:
