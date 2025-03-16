@@ -11,13 +11,12 @@ database_handler = DatabaseHandler(deps=deps)
 
 user_id = "example_user_id"  # Replace with actual user ID
 
+
 async def voice():
-    
     listening = True  # Enable STT by default
 
     # Loop indefinitely until "goodbye" is detected
     while True:
-        
         listening = True  # Enable STT
         # Start the transcription process
         transcription_response = transcribe_audio(listening)
@@ -51,7 +50,8 @@ async def voice():
         if "goodbye" in transcription_response.lower():
             break  # Exit the loop if "goodbye" is detected
 
-        transcription_response = "" # Reset the transcription response
+        transcription_response = ""  # Reset the transcription response
+
 
 async def chat():
     while True:
@@ -63,16 +63,21 @@ async def chat():
         emotion = await bot_emotion(user_id=user_id)
         print("Detected Emotion:", emotion)
 
-        await database_handler.append_message(user_id=user_id, role="user", content=user_message)
-        
+        await database_handler.append_message(
+            user_id=user_id, role="user", content=user_message
+        )
+
         memory = await database_handler.get_memory(user_id=user_id, limit=20)
 
         result = await VISU.run(user_prompt=user_message, message_history=memory)
         response = result.data if result else "Sorry, I failed to process that."
 
         print("Bot:", response)
-        
-        await database_handler.append_message(user_id=user_id, role="bot", content=response)
+
+        await database_handler.append_message(
+            user_id=user_id, role="bot", content=response
+        )
+
 
 if __name__ == "__main__":
     print("Choose an option:")
@@ -84,4 +89,3 @@ if __name__ == "__main__":
         asyncio.run(chat())
     elif choice == "2":
         asyncio.run(voice())
-    

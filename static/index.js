@@ -156,3 +156,24 @@ document.querySelector("button:nth-child(5)").addEventListener("click", () => ey
 document.querySelector("button:nth-child(6)").addEventListener("click", () => eyes.express({ type: "angry" }));
 document.querySelector("button:nth-child(7)").addEventListener("click", () => eyes.express({ type: "focused" }));
 document.querySelector("button:nth-child(8)").addEventListener("click", () => eyes.express({ type: "confused" }));
+
+const socket = new WebSocket("ws://localhost:8765");
+
+socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.emotion) {
+        eyes.express({ type: data.emotion });
+    }
+};
+
+socket.onopen = function() {
+    console.log("WebSocket connected.");
+};
+
+socket.onclose = function() {
+    console.log("WebSocket closed.");
+};
+
+socket.onerror = function(error) {
+    console.error("WebSocket Error:", error);
+};

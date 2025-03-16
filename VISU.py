@@ -7,6 +7,8 @@ from supabase import create_client
 
 settings = Settings()
 
+llm = "llama-3.3-70b-versatile"
+
 # Define Groq model settings
 groq_settings = GroqModelSettings(
     temperature=0.7,
@@ -15,15 +17,16 @@ groq_settings = GroqModelSettings(
     frequency_penalty=0,
 )
 
-# Define the LLM model
-llm = "llama-3.3-70b-versatile"
-
 # Initialize Groq model
 model = GroqModel(
     model_name=llm,
     api_key=settings.groq_key,
 )
 
+emotion_model = GroqModel(
+    model_name=llm,
+    api_key=settings.groq_key,
+)
 
 # Define dependencies
 @dataclass
@@ -46,7 +49,17 @@ VISU = Agent(
     retries=3,
 )
 
+# Initialize the emotion agent
+emotion_agent = Agent(
+    model=emotion_model,
+    model_settings=groq_settings,
+    deps_type=Deps,
+    retries=3,
+)
+
 @VISU.tool_plain()
-async def wave() -> None:
-    """Wave at the the user when being greeted or saying goodbye."""
-    print("Waving... ")
+async def wave_hand() -> None:
+    """Wave your robotic arm to the user when you detect a greeting or goodbye."""
+    print("Waving hand...")
+    # Code to wave the robotic arm
+    

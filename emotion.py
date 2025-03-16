@@ -1,6 +1,6 @@
 import websockets
 import json
-from VISU import Deps, VISU
+from VISU import Deps, emotion_agent
 from DB import DatabaseHandler
 
 # Initialize dependencies and handlers
@@ -41,7 +41,7 @@ async def bot_emotion(user_id: str) -> str:
     messages = await db_handler.get_memory(user_id, limit=MESSAGE_LIMIT)
 
     # Format the prompt with the recent message history
-    response = await VISU.run(user_prompt=prompt_template, message_history=messages)
+    response = await emotion_agent.run(user_prompt=prompt_template, message_history=messages)
 
     # Extract emotion and trigger WebSocket message
     emotion = response.data if response else "neutral"

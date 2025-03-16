@@ -3,7 +3,6 @@ import pyaudio
 import sys
 import time
 import wave
-from uuid import uuid4
 from groq import Groq
 from settings import Settings
 
@@ -25,9 +24,8 @@ vad = webrtcvad.Vad(1)
 # Initialize PyAudio (outside the function)
 pa = pyaudio.PyAudio()
 
-def transcribe_audio(listening : bool) -> str:
 
-
+def transcribe_audio(listening: bool) -> str:
     print("Voice Activity Monitoring")
     print("1 - Activity Detected")
     print("_ - No Activity Detected")
@@ -48,7 +46,6 @@ def transcribe_audio(listening : bool) -> str:
     frames = []  # list to hold audio frames
 
     while True:
-
         if not listening:
             time.sleep(0.1)  # Wait while TTS is playing
             continue
@@ -78,9 +75,8 @@ def transcribe_audio(listening : bool) -> str:
             frames.append(data)
 
             # Save the recorded data as a WAV file
-            filename = (
-                f"audio/RECORDED-{str(time.time())}-{str(uuid4()).replace('-', '')}.wav"
-            )
+            filename = "audio/input_file.wav"
+
             wf = wave.open(filename, "wb")
             wf.setnchannels(CHANNELS)
             wf.setsampwidth(pa.get_sample_size(FORMAT))
