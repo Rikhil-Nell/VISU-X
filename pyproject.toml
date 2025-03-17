@@ -6,10 +6,11 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "deepgram-sdk>=3.10.1",
+    "duckduckgo-search>=7.5.2",
     "flask>=3.1.0",
     "flask-cors>=5.0.0",
     "pyaudio>=0.2.14",
-    "pydantic-ai>=0.0.24",
+    "pydantic-ai>=0.0.40",
     "pydantic-settings>=2.8.0",
     "python-dotenv>=1.0.1",
     "ruff>=0.9.7",

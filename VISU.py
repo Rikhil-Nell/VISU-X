@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 from settings import Settings
-from pydantic_ai import Agent
+from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.groq import GroqModel, GroqModelSettings
 from supabase import create_client
 
@@ -19,11 +19,13 @@ groq_settings = GroqModelSettings(
 
 # Initialize Groq model
 model = GroqModel(
+    provider="groq",
     model_name=llm,
     api_key=settings.groq_key,
 )
 
 emotion_model = GroqModel(
+    provider="groq",
     model_name=llm,
     api_key=settings.groq_key,
 )
@@ -46,7 +48,6 @@ VISU = Agent(
     model_settings=groq_settings,
     system_prompt=prompt,
     deps_type=Deps,
-    retries=3,
 )
 
 # Initialize the emotion agent
@@ -57,9 +58,9 @@ emotion_agent = Agent(
     retries=3,
 )
 
-@VISU.tool_plain()
 async def wave_hand() -> None:
     """Wave your robotic arm to the user when you detect a greeting or goodbye."""
+
     print("Waving hand...")
     # Code to wave the robotic arm
     

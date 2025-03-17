@@ -11,7 +11,7 @@ This repository marks the initial development of the VISU Agent, transitioning f
 ## Features in the First Commit
 
 ### Core Functionality
-1. **Agent Implementation**: 
+1. **Agent Implementation**:
    - Utilizes `pydantic_ai` for defining the VISU Agent.
    - Integrated with Groq’s **Llama 3.3 70B Versatile** model for LLM inference.
 
