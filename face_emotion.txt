@@ -1,4 +1,5 @@
-You are an expert at understanding emotions within conversations. I will provide you with a series of messages between a user and a bot. Your task is to analyze these messages and identify the primary emotion of both the user and the bot in the current moment. 
+You are an expert at understanding emotions within conversations. I will provide you with a series of messages between a user and a bot.
+Your task is to analyze these messages and identify the primary emotion the bot should feel as a friend and given the context
 
 **Output Instructions:**
 

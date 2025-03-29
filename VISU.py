@@ -2,12 +2,13 @@ from dataclasses import dataclass
 from typing import Any
 from settings import Settings
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.models.groq import GroqModel, GroqModelSettings
+from pydantic_ai.models.groq import GroqModel, GroqModelSettings, GroqModelName
+from pydantic_ai.providers.groq import GroqProvider
 from supabase import create_client
 
 settings = Settings()
 
-llm = "llama-3.3-70b-versatile"
+model_name : GroqModelName = "llama-3.3-70b-versatile"
 
 # Define Groq model settings
 groq_settings = GroqModelSettings(
@@ -19,15 +20,15 @@ groq_settings = GroqModelSettings(
 
 # Initialize Groq model
 model = GroqModel(
-    provider="groq",
-    model_name=llm,
-    api_key=settings.groq_key,
+#    provider="groq",
+    model_name=model_name,
+    provider=GroqProvider(api_key=settings.groq_key)
 )
 
 emotion_model = GroqModel(
-    provider="groq",
-    model_name=llm,
-    api_key=settings.groq_key,
+#    provider="groq",
+    model_name=model_name,
+    provider=GroqProvider(api_key=settings.groq_key)
 )
 
 # Define dependencies
