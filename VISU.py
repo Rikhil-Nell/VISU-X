@@ -5,7 +5,7 @@ from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.groq import GroqModel, GroqModelSettings, GroqModelName
 from pydantic_ai.providers.groq import GroqProvider
 from supabase import create_client
-
+from pydantic import BaseModel, Field
 settings = Settings()
 
 model_name : GroqModelName = "llama-3.3-70b-versatile"
@@ -43,6 +43,17 @@ class Deps:
 with open("prompt.txt", "r") as file:
     prompt = file.read()
 
+# Load the emotion analysis template
+with open("face_emotion.txt", "r") as file:
+    emotion_prompt = file.read()
+
+# result type
+emotions : str = "happy, sad, confused, neutral, angry, focused"
+
+class emotion(BaseModel):
+    emotionofuser: str = Field(description=f"The emotion of the user based on conversation history from the list: {emotions}")
+    emotionofbot: str = Field(description=f"The emotion of the bot based on conversation history from the list: {emotions}")
+
 # Initialize the Pixy agent
 VISU = Agent(
     model=model,
@@ -56,7 +67,8 @@ emotion_agent = Agent(
     model=emotion_model,
     model_settings=groq_settings,
     deps_type=Deps,
-    retries=3,
+    system_prompt=emotion_prompt,
+    result_type=emotion,
 )
 
 async def wave_hand() -> None:
