@@ -2,7 +2,6 @@ from deepgram import (
     DeepgramClient,
     SpeakOptions,
 )
-import streamlit as st
 import subprocess
 from settings import Settings
 
@@ -30,8 +29,3 @@ def play() -> None:
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
-
-
-def play_st() -> None:
-    with open("audio/output_file.mp3", "rb") as audio_file:
-        st.audio(audio_file.read(), format="audio/mp3")

@@ -4,11 +4,18 @@ from settings import Settings
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.groq import GroqModel, GroqModelSettings, GroqModelName
 from pydantic_ai.providers.groq import GroqProvider
+from pydantic_ai.models.openai import OpenAIModel, OpenAIModelSettings, OpenAIModelName
+from pydantic_ai.providers.openai import OpenAIProvider
 from supabase import create_client
 from pydantic import BaseModel, Field
 settings = Settings()
 
-model_name : GroqModelName = "llama-3.3-70b-versatile"
+
+visu_model_name : GroqModelName = "llama-3.3-70b-versatile"
+
+# visu_model_name : OpenAIModelName = "chatgpt-4o-latest"
+
+emotion_model_name : GroqModelName = "llama-3.3-70b-versatile"
 
 # Define Groq model settings
 groq_settings = GroqModelSettings(
@@ -18,16 +25,26 @@ groq_settings = GroqModelSettings(
     frequency_penalty=0,
 )
 
+# openai_settings = OpenAIModelSettings(
+#     temperature=0.7,
+#     max_tokens=500,
+#     top_p=0.95,
+#     frequency_penalty=0,
+# )
+
 # Initialize Groq model
-model = GroqModel(
-#    provider="groq",
-    model_name=model_name,
+visu_model = GroqModel(
+    model_name=visu_model_name,
     provider=GroqProvider(api_key=settings.groq_key)
 )
 
-emotion_model = GroqModel(
-#    provider="groq",
-    model_name=model_name,
+# visu_model = OpenAIModel(
+#     model_name=visu_model_name,
+#     provider=OpenAIProvider(api_key=settings.openai_key)
+# )
+
+emotion_model = GroqModel(   
+    model_name=emotion_model_name,
     provider=GroqProvider(api_key=settings.groq_key)
 )
 
@@ -56,7 +73,7 @@ class emotion(BaseModel):
 
 # Initialize the Pixy agent
 VISU = Agent(
-    model=model,
+    model=visu_model,
     model_settings=groq_settings,
     system_prompt=prompt,
     deps_type=Deps,
@@ -68,12 +85,15 @@ emotion_agent = Agent(
     model_settings=groq_settings,
     deps_type=Deps,
     system_prompt=emotion_prompt,
-    result_type=emotion,
+    output_type=emotion,
 )
 
-async def wave_hand() -> None:
-    """Wave your robotic arm to the user when you detect a greeting or goodbye."""
-
+# @VISU.tool_plain(retries = 1)
+async def wave_hand() -> str:
+    """
+        Tool to wave at the user, suggested to use when the user is greeting or saying goodbyes.
+        Args : None
+        Returns : str
+    """
     print("Waving hand...")
-    # Code to wave the robotic arm
-    
+    return "Success!"

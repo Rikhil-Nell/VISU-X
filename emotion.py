@@ -1,5 +1,3 @@
-import websockets
-import json
 import aiohttp
 from VISU import Deps, emotion_agent
 from DB import DatabaseHandler
@@ -8,9 +6,7 @@ from DB import DatabaseHandler
 deps = Deps()
 db_handler = DatabaseHandler(deps=deps)
 
-WEBSOCKET_URL = "ws://localhost:8765"
 MESSAGE_LIMIT = 5
-
 
 async def set_face_emotion(emotion):
     async with aiohttp.ClientSession() as session:
@@ -22,8 +18,8 @@ async def convo_emotion(cur_user_prompt: str, user_id: str) -> str:
     prompt = f"User: {cur_user_prompt}"
     messages = await db_handler.get_memory(user_id, limit=MESSAGE_LIMIT)
     response = await emotion_agent.run(user_prompt=prompt, message_history=messages)
-    bot_emotion = response.data.emotionofbot if response else "neutral"
-    user_emotion = response.data.emotionofuser if response else "neutral"
+    bot_emotion = response.output.emotionofbot if response else "neutral"
+    user_emotion = response.output.emotionofuser if response else "neutral"
     await set_face_emotion(bot_emotion)
 
     return bot_emotion, user_emotion

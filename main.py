@@ -2,14 +2,17 @@ import asyncio
 from VISU import VISU, Deps
 from DB import DatabaseHandler
 from emotion import convo_emotion
+from face_tracker import get_current_user, face_loop
 from STT import transcribe_audio
 from TTS import tts, play
+from pydantic_ai.messages import ModelMessage, ToolCallPart, ToolReturnPart
+from typing import List
 
 # Initialize dependencies and handlers
 deps = Deps()
 database_handler = DatabaseHandler(deps=deps)
 
-user_id = "example_user_id"  # Replace with actual user ID
+Tool_History : List[ModelMessage] = []
 
 async def voice():
     listening = True  # Enable STT by default
@@ -22,21 +25,26 @@ async def voice():
 
         user_message = transcription_response
 
+        # Infering the Speaker's identity
+        user_id = get_current_user()
+        print(f"[INFO] Active user: {user_id}")
+
         # Detect user's emotion and update the frontend
         bot_emotion, user_emotion = await convo_emotion(cur_user_prompt=user_message, user_id=user_id)
         print("Detected Bot Emotion:", bot_emotion)
         print("Detected User Emotion:", user_emotion)
-        
+
         # Retrieve conversation memory
         memory = await database_handler.get_memory(user_id=user_id, limit=20)
 
         # Append user's message to the database
         await database_handler.append_message(user_id, "user", user_message)
- 
+
         # Generate VISU's response
         result = await VISU.run(user_prompt=user_message, message_history=memory)
-        bot_response = result.data if result else "Sorry, I couldn't process that."
+        bot_response = result.output if result else "Sorry, I couldn't process that."
         print("Recieived response:", bot_response)
+        
         # Append VISU's response to the database
         await database_handler.append_message(user_id, "bot", bot_response)
 
@@ -54,6 +62,8 @@ async def voice():
 
 
 async def chat():
+    user_id = "Debug" # In text chat, face tracking isn't active
+
     while True:
         user_message = input("You: ")
 
@@ -71,7 +81,7 @@ async def chat():
         memory = await database_handler.get_memory(user_id=user_id, limit=20)
 
         result = await VISU.run(user_prompt=user_message, message_history=memory)
-        response = result.data if result else "Sorry, I failed to process that."
+        response = result.output if result else "Sorry, I failed to process that."
 
         print("Bot:", response)
 
@@ -79,14 +89,38 @@ async def chat():
             user_id=user_id, role="bot", content=response
         )
 
-
-if __name__ == "__main__":
+# NEW main async function to manage tasks
+async def main():
     print("Choose an option:")
     print("1. Text chat")
     print("2. Voice chat")
     choice = input("Enter your choice (1/2): ")
 
     if choice == "1":
-        asyncio.run(chat())
+        await chat()
     elif choice == "2":
-        asyncio.run(voice())
+        # Create the face tracking task to run in the background
+        print("[INFO] Starting face tracker...")
+        face_task = asyncio.create_task(face_loop())
+
+        # Run the voice chat loop
+        try:
+            await voice()
+        finally:
+            # Ensure the face tracking task is cancelled when voice chat ends
+            print("[INFO] Stopping face tracker...")
+            face_task.cancel()
+            try:
+                await face_task # Allow cancellation to complete
+            except asyncio.CancelledError:
+                print("[INFO] Face tracker stopped.")
+    else:
+        print("Invalid choice.")
+
+
+if __name__ == "__main__":
+    # Run the main async function which handles task creation
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nExiting application.")
