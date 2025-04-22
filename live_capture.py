@@ -4,7 +4,7 @@ import os
 
 # ----------- Config ----------- #
 DB_PATH = "db"  # adjust relative to script location
-MODEL = "VGG-Face"
+MODEL = "Facenet512"
 DETECTOR = "opencv"
 NORMALIZATION = "base"
 DISTANCE_METRIC = "cosine"
@@ -12,7 +12,7 @@ FRAME_INTERVAL = 10
 THRESHOLD = None  # use model default
 # ------------------------------ #
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 frame_count = 0
 
 print("[INFO] Starting face recognition stream (headless). Press Ctrl+C to quit.")
@@ -40,12 +40,15 @@ try:
                     distance_metric=DISTANCE_METRIC,
                     detector_backend=DETECTOR,
                     normalization=NORMALIZATION,
-                    enforce_detection=False,
+                    threshold=0.7,
+                    enforce_detection=True,
                     silent=True
                 )
                 if results and not results[0].empty:
                     identity_path = results[0].iloc[0]["identity"]
                     label = os.path.basename(os.path.dirname(identity_path))
+                    with open("user_id.txt", "w") as f:
+                        f.write(label)
                     print(f"[MATCH] Detected: {label}")
                 else:
                     print("[INFO] No match found.")

@@ -2,7 +2,6 @@ import asyncio
 from VISU import VISU, Deps
 from DB import DatabaseHandler
 from emotion import convo_emotion
-from face_tracker import get_current_user, face_loop
 from STT import transcribe_audio
 from TTS import tts, play
 from pydantic_ai.messages import ModelMessage, ToolCallPart, ToolReturnPart
@@ -26,9 +25,12 @@ async def voice():
         user_message = transcription_response
 
         # Infering the Speaker's identity
-        user_id = get_current_user()
-        print(f"[INFO] Active user: {user_id}")
+        # user_id = get_current_user()
+        # print(f"[INFO] Active user: {user_id}")
 
+        with open("user_id.txt", "r") as f:
+            user_id = f.read()
+        
         # Detect user's emotion and update the frontend
         bot_emotion, user_emotion = await convo_emotion(cur_user_prompt=user_message, user_id=user_id)
         print("Detected Bot Emotion:", bot_emotion)
@@ -99,23 +101,7 @@ async def main():
     if choice == "1":
         await chat()
     elif choice == "2":
-        # Create the face tracking task to run in the background
-        print("[INFO] Starting face tracker...")
-        face_task = asyncio.create_task(face_loop())
-
-        # Run the voice chat loop
-        try:
-            await voice()
-        finally:
-            # Ensure the face tracking task is cancelled when voice chat ends
-            print("[INFO] Stopping face tracker...")
-            face_task.cancel()
-            try:
-                await face_task # Allow cancellation to complete
-            except asyncio.CancelledError:
-                print("[INFO] Face tracker stopped.")
-    else:
-        print("Invalid choice.")
+        await voice()
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "deepface>=0.0.93",
     "deepgram-sdk>=3.11.0",
+    "depthai>=2.30.0.0",
     "pyaudio>=0.2.14",
     "pydantic>=2.11.3",
     "pydantic-ai>=0.1.3",
