@@ -31,6 +31,9 @@ async def voice():
         with open("user_id.txt", "r") as f:
             user_id = f.read()
         
+        if any(greet in user_message.lower() for greet in ["hey", "hello", "hi", "how are you", "greetings", "bye", "goodbye", "see you later"]):
+            send_number_to_rpi(number=2)
+
         # Detect user's emotion and update the frontend
         bot_emotion, user_emotion = await convo_emotion(cur_user_prompt=user_message, user_id=user_id)
         print("Detected Bot Emotion:", bot_emotion)
@@ -72,8 +75,8 @@ async def chat():
         if user_message == "exit":
             break
 
-        if ["hey","hello","hi","how are you","greetings","bye","goodbye","see you later"] in user_message:
-            send_number_to_rpi(number= 2)
+        if any(greet in user_message.lower() for greet in ["hey", "hello", "hi", "how are you", "greetings", "bye", "goodbye", "see you later"]):
+            send_number_to_rpi(number=2)
 
         bot_emotion, user_emotion = await convo_emotion(cur_user_prompt=user_message, user_id=user_id)
         print("Detected Bot Emotion:", bot_emotion)
