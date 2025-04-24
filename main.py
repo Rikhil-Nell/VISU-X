@@ -4,10 +4,10 @@ from DB import DatabaseHandler
 from emotion import convo_emotion
 from STT import transcribe_audio
 from TTS import tts, play
+from pi_serial import send_number_to_rpi
 from pydantic_ai.messages import ModelMessage, ToolCallPart, ToolReturnPart
 from typing import List
 
-# Initialize dependencies and handlers
 deps = Deps()
 database_handler = DatabaseHandler(deps=deps)
 
@@ -71,6 +71,9 @@ async def chat():
 
         if user_message == "exit":
             break
+
+        if ["hey","hello","hi","how are you","greetings","bye","goodbye","see you later"] in user_message:
+            send_number_to_rpi(number= 2)
 
         bot_emotion, user_emotion = await convo_emotion(cur_user_prompt=user_message, user_id=user_id)
         print("Detected Bot Emotion:", bot_emotion)
