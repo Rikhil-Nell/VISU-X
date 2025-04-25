@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 from settings import Settings
+from pi_serial import send_number_to_rpi
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.groq import GroqModel, GroqModelSettings, GroqModelName
 from pydantic_ai.providers.groq import GroqProvider
@@ -88,7 +89,7 @@ emotion_agent = Agent(
     output_type=emotion,
 )
 
-# @VISU.tool_plain(retries = 1)
+@VISU.tool_plain(retries = 1)
 async def wave_hand() -> str:
     """
         Tool to wave at the user, suggested to use when the user is greeting or saying goodbyes.
@@ -96,4 +97,5 @@ async def wave_hand() -> str:
         Returns : str
     """
     print("Waving hand...")
+    send_number_to_rpi(2)
     return "Success!"

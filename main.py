@@ -13,6 +13,13 @@ database_handler = DatabaseHandler(deps=deps)
 
 Tool_History : List[ModelMessage] = []
 
+def get_user_id():
+    try:
+        with open("user_id.txt", "r") as f:
+            return f.read().strip()
+    except Exception:
+        return "Unknown"
+
 async def voice():
     listening = True  # Enable STT by default
 
@@ -27,9 +34,8 @@ async def voice():
         # Infering the Speaker's identity
         # user_id = get_current_user()
         # print(f"[INFO] Active user: {user_id}")
-
-        with open("user_id.txt", "r") as f:
-            user_id = f.read()
+        user_id = get_user_id()
+        print(f"[INFO] Active user: {user_id}")
         
         if any(greet in user_message.lower() for greet in ["hey", "hello", "hi", "how are you", "greetings", "bye", "goodbye", "see you later"]):
             send_number_to_rpi(number=2)
