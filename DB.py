@@ -30,7 +30,7 @@ class DatabaseHandler:
 
         # Fetch the latest messages from Supabase
         response = (
-            supabase.table("memory")
+            supabase.table("test")
             .select("role, content")
             .eq("user_id", user_id)
             .order("timestamp", desc=True)
@@ -46,7 +46,7 @@ class DatabaseHandler:
     async def append_message(self, user_id: str, role: str, content: str) -> None:
         supabase_client = self.deps.supabase_client
 
-        supabase_client.table("memory").insert(
+        supabase_client.table("test").insert(
             {
                 "user_id": user_id,
                 "role": role,

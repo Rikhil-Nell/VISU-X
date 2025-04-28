@@ -89,7 +89,7 @@ emotion_agent = Agent(
     output_type=emotion,
 )
 
-@VISU.tool_plain(retries = 1)
+# @VISU.tool_plain(retries = 1)
 async def wave_hand() -> str:
     """
         Tool to wave at the user, suggested to use when the user is greeting or saying goodbyes.
