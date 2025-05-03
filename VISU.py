@@ -58,11 +58,11 @@ class Deps:
 
 
 # Load the system prompt
-with open("prompt.txt", "r") as file:
+with open("prompts/prompt.txt", "r") as file:
     prompt = file.read()
 
 # Load the emotion analysis template
-with open("face_emotion.txt", "r") as file:
+with open("prompts/face_emotion.txt", "r") as file:
     emotion_prompt = file.read()
 
 # result type
